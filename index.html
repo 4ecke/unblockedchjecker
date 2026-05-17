@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CARTRIDGE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080808;
+      --surface: #101010;
+      --card: #111111;
+      --accent: #f0a500;
+      --accent-dim: rgba(240,165,0,0.12);
+      --text: #e0ddd5;
+      --muted: #444;
+      --border: #1f1f1f;
+      --scanline: rgba(0,0,0,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier Prime', monospace;
+      min-height: 100vh;
+    }
+
+    /* CRT scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        var(--scanline) 3px,
+        var(--scanline) 4px
+      );
+      pointer-events: none;
+      z-index: 9000;
+    }
+
+    /* Grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.08'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 8999;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 28px 80px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 52px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .wordmark {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 10vw, 92px);
+      letter-spacing: 0.06em;
+      line-height: 0.9;
+      color: var(--text);
+    }
+
+    .wordmark em {
+      color: var(--accent);
+      font-style: normal;
+    }
+
+    .header-meta {
+      text-align: right;
+      line-height: 1.7;
+    }
+
+    .header-meta .count {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .header-meta .system-tag {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent-dim);
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(240,165,0,0.08);
+    }
+
+    .card:hover::after { opacity: 1; }
+
+    /* Card art */
+    .art {
+      height: 190px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .art svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Card body */
+    .card-body {
+      padding: 18px 20px 22px;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-platform {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 7px;
+    }
+
+    .card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      margin-bottom: 18px;
+    }
+
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      background: var(--accent);
+      color: #000;
+      font-family: 'Courier Prime', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 9px 18px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .play-btn .arrow {
+      font-size: 10px;
+    }
+
+    .card:hover .play-btn { background: #ffc040; }
+
+    /* Footer */
+    footer {
+      margin-top: 64px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card { animation: fadeUp 0.5s ease both; }
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.12s; }
+    .card:nth-child(3) { animation-delay: 0.19s; }
+
+    header { animation: fadeUp 0.4s ease both; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="wordmark">CART<em>RIDGE</em></div>
+    <div class="header-meta">
+      <div class="count">3 games installed</div>
+      <div class="system-tag">Super Nintendo</div>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- Super Mario World -->
+    <a class="card" href="play.html?rom=roms/Super_Mario_World__USA_.sfc&title=Super+Mario+World&year=1990">
+      <div class="art">
+        <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg">
+          <!-- sky -->
+          <defs>
+            <linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0d3a6e"/>
+              <stop offset="100%" stop-color="#1a5c30"/>
+            </linearGradient>
+          </defs>
+          <rect width="320" height="190" fill="url(#sky1)"/>
+          <!-- stars -->
+          <circle cx="40"  cy="22" r="1.5" fill="#fff" opacity="0.9"/>
+          <circle cx="110" cy="14" r="1"   fill="#fff" opacity="0.7"/>
+          <circle cx="180" cy="28" r="2"   fill="#fff" opacity="0.8"/>
+          <circle cx="260" cy="18" r="1.5" fill="#fff" opacity="0.6"/>
+          <circle cx="295" cy="38" r="1"   fill="#fff" opacity="0.7"/>
+          <circle cx="75"  cy="50" r="1"   fill="#fff" opacity="0.5"/>
+          <!-- hills -->
+          <ellipse cx="80"  cy="200" rx="140" ry="90" fill="#1e7a3c" opacity="0.9"/>
+          <ellipse cx="270" cy="210" rx="160" ry="100" fill="#16612e" opacity="0.8"/>
+          <!-- cloud 1 -->
+          <ellipse cx="70"  cy="70" rx="28" ry="14" fill="#fff" opacity="0.12"/>
+          <ellipse cx="95"  cy="65" rx="20" ry="12" fill="#fff" opacity="0.10"/>
+          <!-- ? block -->
+          <rect x="130" y="72" width="32" height="32" fill="#c87c00" rx="3"/>
+          <rect x="130" y="72" width="32" height="4"  fill="#a86200" rx="3"/>
+          <text x="146" y="94" text-anchor="middle" fill="#fff" font-size="18" font-weight="bold" font-family="monospace">?</text>
+          <!-- pipe -->
+          <rect x="224" y="118" width="36" height="58" fill="#1a8a1a" rx="2"/>
+          <rect x="220" y="114" width="44" height="16" fill="#20aa20" rx="2"/>
+          <!-- pipe shadow -->
+          <rect x="224" y="118" width="8"  height="58" fill="#0a5a0a" opacity="0.4" rx="2"/>
+          <!-- ground -->
+          <rect x="0" y="162" width="320" height="28" fill="#8b4513" opacity="0.6"/>
+          <rect x="0" y="160" width="320" height="4"  fill="#c8762a" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-platform">SNES &nbsp;·&nbsp; 1990</div>
+        <div class="card-title">Super Mario World</div>
+        <button class="play-btn"><span class="arrow">▶</span> Play</button>
+      </div>
+    </a>
+
+    <!-- Super Mario Kart -->
+    <a class="card" href="play.html?rom=roms/Super_Mario_Kart__USA_.sfc&title=Super+Mario+Kart&year=1992">
+      <div class="art">
+        <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0a0a28"/>
+              <stop offset="100%" stop-color="#1a0a00"/>
+            </linearGradient>
+            <pattern id="chk" width="24" height="24" patternUnits="userSpaceOnUse">
+              <rect width="12" height="12" fill="rgba(255,255,255,0.04)"/>
+              <rect x="12" y="12" width="12" height="12" fill="rgba(255,255,255,0.04)"/>
+            </pattern>
+          </defs>
+          <rect width="320" height="190" fill="url(#sky2)"/>
+          <rect width="320" height="190" fill="url(#chk)"/>
+          <!-- road perspective -->
+          <path d="M100,190 L140,90 L180,90 L220,190 Z" fill="#222" opacity="0.9"/>
+          <path d="M118,190 L145,105 L155,105 L182,190 Z" fill="#333" opacity="0.5"/>
+          <!-- dashes -->
+          <rect x="157" y="120" width="6"  height="14" fill="#f0a500" opacity="0.9" rx="1"/>
+          <rect x="157" y="142" width="6"  height="14" fill="#f0a500" opacity="0.7" rx="1"/>
+          <rect x="157" y="164" width="6"  height="14" fill="#f0a500" opacity="0.5" rx="1"/>
+          <!-- speed lines -->
+          <line x1="0"   y1="95" x2="90"  y2="120" stroke="#f0a500" stroke-width="1" opacity="0.2"/>
+          <line x1="0"   y1="115" x2="90" y2="130" stroke="#f0a500" stroke-width="1" opacity="0.15"/>
+          <line x1="320" y1="95" x2="230" y2="120" stroke="#f0a500" stroke-width="1" opacity="0.2"/>
+          <line x1="320" y1="115" x2="230" y2="130" stroke="#f0a500" stroke-width="1" opacity="0.15"/>
+          <!-- trophy -->
+          <text x="160" y="82" text-anchor="middle" font-size="40" opacity="0.25">🏆</text>
+          <!-- stars -->
+          <circle cx="30"  cy="30" r="1.5" fill="#fff" opacity="0.8"/>
+          <circle cx="280" cy="20" r="1"   fill="#fff" opacity="0.6"/>
+          <circle cx="60"  cy="55" r="1"   fill="#fff" opacity="0.5"/>
+          <circle cx="260" cy="50" r="1.5" fill="#fff" opacity="0.7"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-platform">SNES &nbsp;·&nbsp; 1992</div>
+        <div class="card-title">Super Mario Kart</div>
+        <button class="play-btn"><span class="arrow">▶</span> Play</button>
+      </div>
+    </a>
+
+    <!-- Sonic -->
+    <a class="card" href="play.html?rom=roms/Sonic_the_Hedgehog__Unl___p1_.smc&title=Sonic+the+Hedgehog&year=Unlicensed+Port">
+      <div class="art">
+        <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="sky3" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#001033"/>
+              <stop offset="100%" stop-color="#050518"/>
+            </linearGradient>
+          </defs>
+          <rect width="320" height="190" fill="url(#sky3)"/>
+          <!-- speed blur lines -->
+          <line x1="-10" y1="55"  x2="210" y2="78"  stroke="#1a5fff" stroke-width="5" opacity="0.35"/>
+          <line x1="-10" y1="75"  x2="240" y2="88"  stroke="#1a5fff" stroke-width="9" opacity="0.28"/>
+          <line x1="-10" y1="95"  x2="230" y2="95"  stroke="#1a5fff" stroke-width="13" opacity="0.22"/>
+          <line x1="-10" y1="115" x2="220" y2="104" stroke="#1a5fff" stroke-width="9" opacity="0.28"/>
+          <line x1="-10" y1="133" x2="195" y2="116" stroke="#1a5fff" stroke-width="5" opacity="0.35"/>
+          <!-- afterimage blur -->
+          <ellipse cx="105" cy="95" rx="90" ry="18" fill="#1a4fff" opacity="0.06"/>
+          <!-- rings -->
+          <circle cx="228" cy="62"  r="20" fill="none" stroke="#f0a500" stroke-width="5" opacity="1"/>
+          <circle cx="262" cy="95"  r="15" fill="none" stroke="#f0a500" stroke-width="4" opacity="0.75"/>
+          <circle cx="240" cy="128" r="10" fill="none" stroke="#f0a500" stroke-width="3" opacity="0.5"/>
+          <circle cx="290" cy="55"  r="8"  fill="none" stroke="#f0a500" stroke-width="2.5" opacity="0.4"/>
+          <!-- checkerboard ground -->
+          <rect x="0" y="158" width="320" height="32" fill="#111" opacity="0.7"/>
+          <pattern id="gc" width="16" height="16" patternUnits="userSpaceOnUse" x="0" y="158">
+            <rect width="8"  height="8"  fill="#1a1a1a"/>
+            <rect x="8" y="8" width="8" height="8" fill="#1a1a1a"/>
+          </pattern>
+          <rect x="0" y="158" width="320" height="32" fill="url(#gc)" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <div class="card-platform">SNES &nbsp;·&nbsp; Unlicensed Port</div>
+        <div class="card-title">Sonic the Hedgehog</div>
+        <button class="play-btn"><span class="arrow">▶</span> Play</button>
+      </div>
+    </a>
+
+  </div>
+
+  <footer>
+    Cartridge &nbsp;/&nbsp; Browser-based SNES Emulation &nbsp;/&nbsp; EmulatorJS
+  </footer>
+
+</div>
+</body>
+</html>
